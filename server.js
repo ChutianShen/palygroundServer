@@ -19,7 +19,7 @@ var friendRequests = require('./firebase/friend-service');
 accountRequests.userAccountRequests(io);
 friendRequests.userFriendRequests(io);
 
-var port = 4000;
+var port = process.env.PORT || 4000;
 
 http.listen(port, () => {
 	console.log('Server is listening on port ' + port)
