@@ -21,6 +21,10 @@ friendRequests.userFriendRequests(io);
 
 var port = process.env.PORT || 4000;
 
+app.get('/', function(req, res){
+  res.send('Hello World!')
+})
+
 http.listen(port, () => {
 	console.log('Server is listening on port ' + port)
 });
