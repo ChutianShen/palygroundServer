@@ -137,6 +137,58 @@ function sendOrDeleteFriendRequest(socket, io){
   });
 }
 
+function sendOrDeleteGameRequest(socket, io){
+  socket.on('gameRequest', (data) => {
+    var friendEmail = data.friendEmail;
+    var userEmail = data.userEmail;
+    var requestCode = data.requestCode;
+
+    var db = admin.database();
+    var gameRef = db.ref('gameRequestReceieved').child(encodeEmail(friendEmail))
+    .child(encodeEmail(userEmail));
+
+    console.log("requestCode: " + requestCode); //for debugging
+
+
+    if(requestCode == 0){
+      var db = admin.database();
+      var ref = db.ref('users');
+      var userRef = ref.child(encodeEmail(data.userEmail));
+
+      userRef.once('value', (snapshot) => {
+        gameRef.set({
+          email:snapshot.val().email,
+          userName:snapshot.val().userName,
+          userPicture:snapshot.val().userPicture,
+          dateJoined:snapshot.val().dateJoined,
+          hasLoggedIn:snapshot.val().hasLoggedIn
+        });
+      });
+
+      var tokenRef = db.ref('userToken');
+      var friendToken = tokenRef.child(encodeEmail(friendEmail));
+
+      friendToken.once("value", (snapshot) => {
+        var message = {
+          to : snapshot.val().token,    //send to the guy who has this tokenRef
+
+          data : {
+            title : 'Beast Chat',
+            body : `Friend Request from ${userEmail}`
+          },
+        };
+        fcm.send(message)
+        .then((response) => {
+          console.log('Message sent!');
+        }).catch((err) => {
+          console.log(err);
+        });
+      });
+    } else {
+      gameRef.remove();
+    }
+  });
+}
 
 function detectDisconnection(socket,io){
       socket.on('disconnect',()=>{
