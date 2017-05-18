@@ -16,6 +16,7 @@ var userFriendRequests = (io) =>{
     sendMessage(socket, io);
     approveOrDeclineFrienqRequest(socket,io);
     sendOrDeleteFriendRequest(socket, io);
+    sendOrDeleteGameRequest(socket, io);
     detectDisconnection(socket, io);
 	});
 };
