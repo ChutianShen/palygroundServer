@@ -14,6 +14,7 @@ var userFriendRequests = (io) =>{
     console.log(`Client ${socket.id} has connected to friend service!`);
 
     sendMessage(socket, io);
+    sendMove(socket, io);
     approveOrDeclineFrienqRequest(socket,io);
     approveOrDeclineGameRequest(socket,io);
     sendOrDeleteFriendRequest(socket, io);
@@ -21,6 +22,29 @@ var userFriendRequests = (io) =>{
     detectDisconnection(socket, io);
 	});
 };
+
+function sendMove(socket, io){
+  socket.on('movedetails', (data) => {
+    var db = admin.database();
+    var friendMoveRef = db.ref('userMove').child(encodeEmail(data.gameFriendEmail))
+    .child(encodeEmail(data.moveSenderEmail)).push();
+
+    console.log(data.moveSenderEmail + ": " + data.moveText);
+
+    var newfriendMoveRef = db.ref('newUserMoves').child(encodeEmail(data.gameFriendEmail))
+    .child(friendMoveRef.key).push();
+
+    var move={
+      moveId: friendMoveRef.key,
+      moveText: data.moveText,
+      moveSenderEmail: data.moveSenderEmail
+    };
+
+    friendMoveRef.set(move);
+    newfriendMoveRef.set(move);
+
+  });
+}
 
 function sendMessage(socket, io){
   socket.on('details', (data) => {
